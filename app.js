@@ -54,7 +54,7 @@ io.on('connection', function (socket) {
         socket.join(room, function () {
             let isHost = false;
             socket.room = room;
-            if(!pokerRooms.hasOwnProperty(room)){
+            if (!pokerRooms.hasOwnProperty(room)) {
                 pokerRooms[room] = defaultRoom;
                 pokerRooms[room].host = socket.id;
                 isHost = true;
@@ -64,10 +64,10 @@ io.on('connection', function (socket) {
                 pokerRooms[room].users = clients.length;
                 //console.log(pokerRooms);
             });
-            socket.emit('connectedToRoom', { is_host: isHost, message: 'Welcome ' + socket.id +  ', You have connected to room ' + room});
+            socket.emit('connectedToRoom', { is_host: isHost, message: 'Welcome ' + socket.id + ', You have connected to room ' + room });
             socket.broadcast.emit('chatMessage', 'Welcome ' + socket.id + ' to the room');
         });
-        
+
     });
 
     //get list of rooms on server
@@ -79,6 +79,7 @@ io.on('connection', function (socket) {
     //when user disconnected (might update number users)
     socket.on('disconnect', function () {
         //console.log('user disconnected id: ' + socket.id);
+        io.to(socket.room).emit('chatMessage', socket.id + ' left the room');
     });
 
     //planning poker functions
@@ -90,7 +91,7 @@ io.on('connection', function (socket) {
         //console.log(pokerRooms);
         if (pokerRooms[data.room].played >= pokerRooms[data.room].users) {
             let total = 0;
-            for(let i = 0; i < pokerRooms[data.room].numbers.length; i++) {
+            for (let i = 0; i < pokerRooms[data.room].numbers.length; i++) {
                 total += pokerRooms[data.room].numbers[i];
             }
             let avg = total / pokerRooms[data.room].numbers.length;

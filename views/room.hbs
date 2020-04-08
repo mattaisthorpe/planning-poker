@@ -1,13 +1,17 @@
-<p id="roomNo">The message</p>
+<div id="roomNo" class="alert alert-primary" role="alert">
+    Placeholder message...
+</div>
 
-{{#each cards}}
-    {{> card this}}
-{{/each}}
+<div class="text-center">
+    {{#each cards}}
+        {{> card this}}
+    {{/each}}
+</div>
 
 <ul id="played-cards"></ul>
 
 {{!-- Chat area (may remove) --}}
-<ul id="messages"></ul>
+<ul id="messages" class="list-group"></ul>
 <form class="form-inline fixed-bottom">
     <div class="form-group mx-sm-3 mb-2">
         <label for="message" class="sr-only">Message...</label>
@@ -59,7 +63,7 @@
         });
 
         socket.on('pokerReset', function (msg) {
-             $('.poker-card').removeAttr('disabled');
+            $('.poker-card').removeAttr('disabled');
         });
 
         //for chat area (may remove)
@@ -70,7 +74,7 @@
             return false;
         });
         socket.on('chatMessage', function (msg) {
-            $('#messages').append($('<li>').text(msg));
+            $('#messages').append($('<li class="list-group-item">').text(msg));
         });
     }
 </script>
