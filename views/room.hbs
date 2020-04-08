@@ -1,7 +1,19 @@
 <p id="roomNo">The message</p>
+
+{{#each cards}}
+    {{> card this}}
+{{/each}}
+
+<ul id="played-cards"></ul>
+
+{{!-- Chat area (may remove) --}}
 <ul id="messages"></ul>
-<form action="">
-    <input id="m" autocomplete="off" /><button>Send</button>
+<form class="form-inline fixed-bottom">
+    <div class="form-group mx-sm-3 mb-2">
+        <label for="message" class="sr-only">Message...</label>
+        <input type="text" class="form-control" id="message" placeholder="Message...">
+    </div>
+    <button type="submit" class="btn btn-primary mb-2">Send</button>
 </form>
 
 {{> scripts}}
@@ -19,21 +31,45 @@
     function roomController(hash) {
         const socket = io();
 
+        //connecting to room
         socket.emit('connectToRoom', hash);
 
         socket.on('connectedToRoom', function (response) {
             $('#roomNo').innerHTML = '';
-            $('#roomNo').text(response);
+            $('#roomNo').text(response.message);
+            if (response.is_host) {
+                //hosty controls
+                console.log('You are host');
+            }
         });
 
+        //for planning poker
+        $('.poker-card').on("click", function () {
+            let value = $(this).data("value");
+            $('.poker-card').attr('disabled', 'disabled');
+            socket.emit('pokerPlayed', { "room": hash, "value": value, "user": socket.id });
+        });
+
+        socket.on('pokerPlayed', function (msg) {
+            $('#played-cards').append($('<li>').text(msg));
+        });
+
+        socket.on('pokerFinalised', function (msg) {
+            $('#played-cards').append($('<li>').text(msg));
+        });
+
+        socket.on('pokerReset', function (msg) {
+             $('.poker-card').removeAttr('disabled');
+        });
+
+        //for chat area (may remove)
         $('form').submit(function (e) {
             e.preventDefault(); // prevents page reloading
-            socket.emit('chat message', { "room": hash, "message": $('#m').val() });
-            $('#m').val('');
+            socket.emit('chatMessage', { "room": hash, "message": $('#message').val() });
+            $('#message').val('');
             return false;
         });
-
-        socket.on('chat message', function (msg) {
+        socket.on('chatMessage', function (msg) {
             $('#messages').append($('<li>').text(msg));
         });
     }
