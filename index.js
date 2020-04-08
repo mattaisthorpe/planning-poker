@@ -4,18 +4,34 @@ const http = require('http').createServer(app);
 const port = 3000;
 const io = require('socket.io')(http);
 
+//Loads the handlebars module
+const handlebars = require('express-handlebars');
+
+//Use the handlebars engine
+app.set('view engine', 'hbs');
+
+//Sets handlebars configurations (we will go through them later on)
+app.engine('hbs', handlebars({
+    layoutsDir: __dirname + '/views/layouts',
+    extname: 'hbs',
+    defaultLayout: 'homepage',
+}));
+
 app.use('/', express.static(__dirname + '/public'));
 
-app.get('/', function (req, res) {
-    res.sendFile(__dirname + '/views/index.html');
+app.get('/', (req, res) => {
+    //Serves the body of the page aka "main.handlebars" to the container //aka "index.handlebars"
+    res.render('homepage', { layout: false });
 });
 
-app.get("/rooms", (req, res) => {
-    res.sendFile(__dirname + "/views/rooms.html");
+app.get('/rooms', (req, res) => {
+    //Serves the body of the page aka "main.handlebars" to the container //aka "index.handlebars"
+    res.render('rooms', { layout: 'mainpage' });
 });
 
-app.get("/room", (req, res) => {
-    res.sendFile(__dirname + "/views/room.html");
+app.get('/room', (req, res) => {
+    //Serves the body of the page aka "main.handlebars" to the container //aka "index.handlebars"
+    res.render('room', { layout: 'mainpage' });
 });
 
 io.on('connection', function (socket) {

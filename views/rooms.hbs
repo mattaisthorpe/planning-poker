@@ -1,0 +1,22 @@
+<div id="rooms" class="list-group"></div>
+
+{{> scripts}}
+<script>
+    $(function () {
+        var socket = io();
+
+        socket.emit('getRoomList');
+
+        socket.on('updateRoomList', function (rooms) {
+            console.log(rooms);
+            $.each(rooms, function (i, val) {
+                //we dont want to list the users rooms
+                if (val['length'] == 1 && i == Object.keys(val['sockets'])[0]) {
+                    return true;
+                }
+                let string = '<a href="/room#' + i + '" class="list-group-item list-group-item-action">' + i + '</a>';
+                $("#rooms").append(string);
+            });
+        });
+    });
+</script>
