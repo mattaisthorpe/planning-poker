@@ -58,6 +58,7 @@ io.on('connection', function (socket) {
                 pokerRooms[room] = defaultRoom;
                 pokerRooms[room].host = socket.id;
                 isHost = true;
+                roomList(false);
             }
             io.in(room).clients((err, clients) => {
                 //console.log(clients);
@@ -72,8 +73,7 @@ io.on('connection', function (socket) {
 
     //get list of rooms on server
     socket.on('getRoomList', function () {
-        let rooms = io.sockets.adapter.rooms;
-        socket.emit('updateRoomList', rooms);
+        roomList();
     });
 
     //when user disconnected (might update number users)
@@ -105,6 +105,15 @@ io.on('connection', function (socket) {
     socket.on('chatMessage', function (data) {
         io.to(data.room).emit('chatMessage', data.message);
     });
+
+    function roomList(userUpdate = true) {
+        let rooms = io.sockets.adapter.rooms;
+        if(userUpdate) {
+            socket.emit('updateRoomList', rooms);
+        } else {
+            io.emit('updateRoomList', rooms);
+        }
+    }
 
 });
 

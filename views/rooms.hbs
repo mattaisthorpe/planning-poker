@@ -1,5 +1,8 @@
-<div id="rooms" class="list-group"></div>
-
+<h1>Rooms available</h1>
+<div id="rooms" class="list-group mb-3"></div>
+<div class="text-center">
+    <button class="btn btn-lg btn-primary btn-block create-room-btn">Create Room</button>
+</div>
 {{> scripts}}
 <script>
     $(function () {
@@ -8,15 +11,26 @@
         socket.emit('getRoomList');
 
         socket.on('updateRoomList', function (rooms) {
-
+            $("#rooms").innerHTML = '';
+            let roomsAvailable = 0;
             $.each(rooms, function (i, val) {
-                //we dont want to list the users rooms
+                //we dont want to list the users rooms (there is definetly a better way)
                 if (val['length'] == 1 && i == Object.keys(val['sockets'])[0]) {
                     return true;
                 }
                 let string = '<a href="/room#' + i + '" class="list-group-item list-group-item-action">' + i + '</a>';
                 $("#rooms").append(string);
+                roomsAvailable++;
             });
+            if (roomsAvailable <= 0) {
+                let string = '<li class="list-group-item list-group-item-warning">Unfortunately there are no rooms available. Maybe you can create your own room?</li>';
+                $("#rooms").append(string);
+            }
+        });
+
+        $(".create-room-btn").on("click", function () {
+            const roomID = randomstring();
+            window.location.href = "/room#" + roomID;
         });
     });
 </script>
