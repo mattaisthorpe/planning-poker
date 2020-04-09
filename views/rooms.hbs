@@ -11,18 +11,16 @@
         socket.emit('getRoomList');
 
         socket.on('updateRoomList', function (rooms) {
-            $("#rooms").innerHTML = '';
-            let roomsAvailable = 0;
-            $.each(rooms, function (i, val) {
-                //we dont want to list the users rooms (there is definetly a better way)
-                if (val['length'] == 1 && i == Object.keys(val['sockets'])[0]) {
-                    return true;
-                }
-                let string = '<a href="/room#' + i + '" class="list-group-item list-group-item-action">' + i + '</a>';
-                $("#rooms").append(string);
-                roomsAvailable++;
-            });
-            if (roomsAvailable <= 0) {
+            console.log(rooms);
+            $("#rooms").empty();
+            const roomsAvailable = Object.keys(rooms).length;
+            if (roomsAvailable >= 0) {
+                $.each(rooms, function (i, val) {
+                    let currentUsers = Object.keys(val.users).length;
+                    let string = '<a href="/room#' + i + '" class="list-group-item list-group-item-action"><strong>' + val['name'] + '</strong> <span class="badge badge-pill badge-primary">' + currentUsers + '</span></a>';
+                    $("#rooms").append(string);
+                });
+            } else {
                 let string = '<li class="list-group-item list-group-item-warning">Unfortunately there are no rooms available. Maybe you can create your own room?</li>';
                 $("#rooms").append(string);
             }

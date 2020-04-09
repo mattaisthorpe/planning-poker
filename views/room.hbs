@@ -2,48 +2,78 @@
     Placeholder message...
 </div>
 
-<div class="text-center">
-    {{#each cards}}
-        {{> card this}}
-    {{/each}}
-</div>
+<div class="row">
+    <div class="col">
+        <div class="text-center">
+            <div id="task-name-area">
+                <h1 id="task-name" class="d-inline mb-2">New Task</h1>
+                <button class="btn btn-outline-secondary btn-sm ml-2 edit-task-btn">edit</button>
+            </div>
+            <form id="task-name-form" class="form-inline">
+                <div class="form-group mb-2">
+                    <label for="task-name-field" class="sr-only">Task Name</label>
+                    <input type="text" class="form-control-plaintext" id="task-name-field" value="New Task">
+                </div>
+                <button type="submit" class="btn btn-primary mb-2">Save</button>
+            </form>
+            <hr>
+        </div>
 
-<ul id="played-cards"></ul>
+        <div class="text-center mb-3">
+            {{#each cards}}
+            {{> card this}}
+            {{/each}}
+        </div>
 
-{{!-- Chat area (may remove) --}}
-<ul id="messages" class="list-group"></ul>
-<form class="form-inline fixed-bottom">
-    <div class="form-group mx-sm-3 mb-2">
-        <label for="message" class="sr-only">Message...</label>
-        <input type="text" class="form-control" id="message" placeholder="Message...">
+        <ul id="messages" class="list-group"></ul>
     </div>
-    <button type="submit" class="btn btn-primary mb-2">Send</button>
-</form>
+    <div class="col-3">
+        <h3>Users</h3>
 
+        <ul id="users" class="list-group"></ul>
+
+        <form id="message-form" class="form-inline mb-2">
+            <div class="form-group">
+                <label for="message" class="sr-only">Message...</label>
+                <input type="text" class="form-control" id="message" placeholder="Message...">
+            </div>
+            <button type="submit" class="btn btn-primary">Send</button>
+        </form>
+    </div>
+</div>
 {{> scripts}}
 <script>
     $(function () {
-        let hash = '';
+        let roomData = {};
         if (window.location.hash) {
             hash = window.location.hash.substring(1);
-            roomController(hash);
+            roomData.hash = hash;
+            roomData.roomname = '';
+            roomData.username = '';
+            roomController(roomData);
         } else {
             window.location.href = "/";
         }
     });
 
-    function roomController(hash) {
+    function roomController(roomData) {
         const socket = io();
 
+        //hide all controls
+        $('#task-name-form').hide();
+        $('.edit-task-btn').hide();
+
         //connecting to room
-        socket.emit('connectToRoom', hash);
+        socket.emit('connectToRoom', roomData);
 
         socket.on('connectedToRoom', function (response) {
-            $('#roomNo').innerHTML = '';
             $('#roomNo').text(response.message);
             if (response.is_host) {
                 //hosty controls
                 console.log('You are host');
+                $('.edit-task-btn').show();
+            } else {
+                //we need to show all room content
             }
         });
 
@@ -54,27 +84,57 @@
             socket.emit('pokerPlayed', { "room": hash, "value": value, "user": socket.id });
         });
 
-        socket.on('pokerPlayed', function (msg) {
-            $('#played-cards').append($('<li>').text(msg));
-        });
-
-        socket.on('pokerFinalised', function (msg) {
-            $('#played-cards').append($('<li>').text(msg));
-        });
-
         socket.on('pokerReset', function (msg) {
             $('.poker-card').removeAttr('disabled');
         });
 
         //for chat area (may remove)
-        $('form').submit(function (e) {
+        $('#message-form').submit(function (e) {
             e.preventDefault(); // prevents page reloading
             socket.emit('chatMessage', { "room": hash, "message": $('#message').val() });
             $('#message').val('');
             return false;
         });
-        socket.on('chatMessage', function (msg) {
-            $('#messages').append($('<li class="list-group-item">').text(msg));
+
+        //any messages append to this feed (may turn into json)
+        socket.on('newChatMessage', function (message) {
+            $('#messages').append($('<li class="list-group-item">').text(message));
         });
+
+        //reload user list
+        socket.on('updateUsers', function (users) {
+            $('#users').empty();
+            $.each(users, function (i, val) {
+                let classes = '';
+                console.log(val)
+                if (val['is_host'] == true) {
+                    classes += ' active';
+                }
+                $('#users').append($('<li class="list-group-item' + classes + '">').text(val['name']));
+            });
+        });
+
+        //edit task button
+        $('.edit-task-btn').click(function () {
+            var dad = $(this).parent().parent();
+            $('#task-name-area').hide();
+            $('#task-name-form').show();
+            $('#task-name-field').val($('#task-name').text()).focus();
+        });
+
+        $('#task-name-form').submit(function (e) {
+            e.preventDefault(); // prevents page reloading
+            const newTaskName = $('#task-name-field').val();
+            socket.emit('changeTaskName', { "room": hash, "name": newTaskName });
+            $('#task-name-area').show();
+            $('#task-name-form').hide();
+            return false;
+        });
+
+        //update task name text
+        socket.on('updateTaskName', function (newTaskName) {
+            $('#task-name').text(newTaskName);
+        });
+
     }
 </script>
