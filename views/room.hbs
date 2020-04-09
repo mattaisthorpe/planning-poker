@@ -10,6 +10,7 @@
                 <button class="btn btn-outline-secondary btn-sm ml-2 edit-task-btn">edit</button>
             </div>
             <form id="task-name-form" class="form-inline">
+
                 <div class="form-group mb-2">
                     <label for="task-name-field" class="sr-only">Task Name</label>
                     <input type="text" class="form-control-plaintext" id="task-name-field" value="New Task">
@@ -25,19 +26,31 @@
             {{/each}}
         </div>
 
+        <div class="progress mb-3">
+            <div class="progress-bar poker-progress-bar" style="width: 0%;" role="progressbar" aria-valuenow="00" aria-valuemin="0"
+                aria-valuemax="100"></div>
+        </div>
+
         <ul id="messages" class="list-group"></ul>
     </div>
     <div class="col-3">
+        <div class="admin-controls mb-3">
+            <button type="button" class="btn btn-outline-success btn-block start-poker">Start</button>
+            <button type="button" class="btn btn-outline-info btn-block reveal-poker">Reveal</button>
+            <button type="button" class="btn btn-outline-danger btn-block stop-poker">Stop</button>
+            <button type="button" class="btn btn-outline-warning btn-block reset-poker">Reset</button>
+        </div>
         <h3>Users</h3>
+        <ul id="users" class="list-group mb-3"></ul>
 
-        <ul id="users" class="list-group"></ul>
-
-        <form id="message-form" class="form-inline mb-2">
-            <div class="form-group">
-                <label for="message" class="sr-only">Message...</label>
-                <input type="text" class="form-control" id="message" placeholder="Message...">
+        <form id="message-form" class="form-inline ">
+            <div class="input-group mb-3">
+                <input type="text" class="form-control" id="message" placeholder="Message group..." aria-label="message"
+                    aria-describedby="button-addon2">
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="submit" id="button-addon2">Send</button>
+                </div>
             </div>
-            <button type="submit" class="btn btn-primary">Send</button>
         </form>
     </div>
 </div>
@@ -62,6 +75,10 @@
         //hide all controls
         $('#task-name-form').hide();
         $('.edit-task-btn').hide();
+        $('.admin-controls').hide();
+
+        //disable cards
+        $('.poker-card').attr('disabled', 'disabled');
 
         //connecting to room
         socket.emit('connectToRoom', roomData);
@@ -69,23 +86,46 @@
         socket.on('connectedToRoom', function (response) {
             $('#roomNo').text(response.message);
             if (response.is_host) {
-                //hosty controls
-                console.log('You are host');
                 $('.edit-task-btn').show();
+                $('.admin-controls').show();
             } else {
                 //we need to show all room content
             }
         });
 
         //for planning poker
+        $('.start-poker').on("click", function () {
+            socket.emit('startPoker', { "room": hash });
+        });
+
+        $('.reset-poker').on("click", function () {
+            socket.emit('restartPoker', { "room": hash });
+        });
+
+        $('.stop-poker').on("click", function () {
+            socket.emit('stopPoker', { "room": hash });
+        });
+
+        $('.reveal-poker').on("click", function () {
+            socket.emit('revealPoker', { "room": hash });
+        });
+
         $('.poker-card').on("click", function () {
             let value = $(this).data("value");
             $('.poker-card').attr('disabled', 'disabled');
             socket.emit('pokerPlayed', { "room": hash, "value": value, "user": socket.id });
         });
 
-        socket.on('pokerReset', function (msg) {
+        socket.on('unlockCards', function (msg) {
             $('.poker-card').removeAttr('disabled');
+        });
+
+        socket.on('lockCards', function (msg) {
+            $('.poker-card').attr('disabled', 'disabled');
+        });
+
+        socket.on('updatePercentage', function (percent) {
+            $('.poker-progress-bar').width(percent + '%');
         });
 
         //for chat area (may remove)
@@ -106,13 +146,12 @@
             $('#users').empty();
             $.each(users, function (i, val) {
                 let classes = '';
-                console.log(val)
                 if (val['is_host'] == true) {
                     classes += ' active';
                 }
                 $('#users').append($('<li class="list-group-item' + classes + '">').text(val['name']));
             });
-        });
+        });  
 
         //edit task button
         $('.edit-task-btn').click(function () {

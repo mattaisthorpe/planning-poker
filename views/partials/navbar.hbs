@@ -1,7 +1,9 @@
 <nav class="navbar">
     <a class="navbar-brand" href="/">{{title}}</a>
 
+    {{#if show-leave}}
     <form class="form-inline float-right">
-        <button class="btn btn-outline-danger" type="button">Leave Room</button>
+        <a href="/rooms" class="btn btn-outline-danger" type="button">Leave Room</a>
     </form>
+    {{/if}}
 </nav>
