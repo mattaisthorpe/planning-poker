@@ -31,6 +31,12 @@
                 aria-valuemin="0" aria-valuemax="100"></div>
         </div>
 
+        <div class="played-cards text-center mb-3">
+        </div>
+        <div class="text-center mb-3">
+            <h5 class="total-effort"></h5>
+        </div>
+
         <ul id="messages" class="list-group"></ul>
     </div>
     <div class="col-3">
@@ -50,8 +56,8 @@
 
         <form id="message-form" class="form-inline ">
             <div class="input-group mb-3">
-                <input type="text" class="form-control form-control-sm" id="message" placeholder="Message group..." aria-label="message"
-                    aria-describedby="button-addon2">
+                <input type="text" class="form-control form-control-sm" id="message" placeholder="Message group..."
+                    aria-label="message" aria-describedby="button-addon2">
                 <div class="input-group-append">
                     <button class="btn btn-outline-secondary btn-sm" type="submit" id="button-addon2">Send</button>
                 </div>
@@ -163,6 +169,22 @@
             $('.poker-progress-bar').width(percent + '%');
         });
 
+        socket.on('updateCards', function (cards) {
+            $('.played-cards').empty();
+            $('.total-effort').empty();
+            $.each(cards, function (i, val) {
+                $('.played-cards').append($('<div class="btn btn-primary btn-lg played-card mb-1 mr-1" data-value="' + val + '">').text('?'));
+            });
+        });
+
+        socket.on('revealCards', function (average) {
+            $('.played-card').each(function (i, val) {
+                console.log($(this).data("value"));
+                $(this).text($(this).data("value"));
+            });
+            $('.total-effort').text('Estimated effort ' + average);
+        });
+
         socket.on('pokerFinished', function () {
             $('.admin-controls .btn').attr('disabled', 'disabled');
             $('.admin-controls .reveal-poker').removeAttr('disabled');
@@ -198,7 +220,7 @@
                     $('.poker-username').text(val.name);
                     classes += ' active';
                 }
-                $('#users').append($('<li class="list-group-item d-flex justify-content-between align-items-center' + classes + '">').html(string));
+                $('#users').append($('<li class="list-group-item d-flex justify-content-between align-items-center' + classes + '" data-userid="' + i + '">').html(string));
             });
         });
 

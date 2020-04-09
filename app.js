@@ -55,6 +55,7 @@ io.on('connection', function (socket) {
                 pokerRooms[room] = {
                     name: roomName(roomData.roomname),
                     task: 'New Task',
+                    average: 0,
                     users: {},
                     played: 0,
                     numbers: [],
@@ -123,6 +124,7 @@ io.on('connection', function (socket) {
     //planning poker functions
     socket.on('startPoker', function (data) {
         io.to(data.room).emit('unlockCards');
+        updateCards(data.room);
         chatMessage(data.room, "has started planning for <strong>" + pokerRooms[data.room].task + "</strong>");
     });
 
@@ -149,6 +151,7 @@ io.on('connection', function (socket) {
         let percentageComplete = pokerRooms[data.room].played / amountUsers * 100;
         updatePercentage(data.room, percentageComplete);
         pokerRooms[data.room].numbers.push(data.value);
+        updateCards(data.room);
 
         chatMessage(data.room, "played <strong>" + data.value + "</strong>");
 
@@ -163,9 +166,11 @@ io.on('connection', function (socket) {
         for (let i = 0; i < pokerRooms[data.room].numbers.length; i++) {
             total += pokerRooms[data.room].numbers[i];
         }
-        let avg = total / pokerRooms[data.room].numbers.length;
+        let average = Math.floor(total / pokerRooms[data.room].numbers.length);
+        pokerRooms[data.room].average = average;
         chatMessage(data.room, "is revealing the result...");
-        chatMessage(data.room, "The total effort for <strong>" + pokerRooms[data.room].task + "</strong> is <strong>" + avg + "</strong>", false);
+        chatMessage(data.room, "The total effort for <strong>" + pokerRooms[data.room].task + "</strong> is <strong>" + average + "</strong>", false);
+        revealCards(data.room);
         pokerReset(data.room);
     });
 1
@@ -219,6 +224,14 @@ io.on('connection', function (socket) {
 
     function updatePercentage(room, percentage) {
         io.to(room).emit('updatePercentage', Math.floor(percentage));
+    }
+
+    function updateCards(room) {
+        io.to(room).emit('updateCards', pokerRooms[room].numbers);
+    }
+
+    function revealCards(room) {
+        io.to(room).emit('revealCards', pokerRooms[room].average);
     }
 
     function pokerReset(room) {
