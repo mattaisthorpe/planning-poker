@@ -59,10 +59,9 @@ io.on('connection', function (socket) {
                     played: 0,
                     numbers: [],
                     host: socket.id,
-                    chatHistory: {}
+                    chat_history: []
                 };
                 socket.is_host = true;
-                roomList(false);
             }
 
             //update amount of users in room
@@ -74,11 +73,13 @@ io.on('connection', function (socket) {
 
             //announce user has joined room
             updateUsers(room);
-            chatMessage(room, 'Welcome ' + socket.username + ' to the room', true);
+            chatMessage(room, 'joined the room');
+            roomList(false);
             socket.emit('connectedToRoom', {
                 is_host: socket.is_host,
+                username: socket.username,
                 room: pokerRooms[room],
-                message: 'Welcome ' + socket.username + ', You have connected to room ' + pokerRooms[room].name
+                message: 'Welcome <strong>' + socket.username + '</strong>, You have connected to room <strong>' + pokerRooms[room].name + '</strong>'
             });
         });
 
@@ -100,7 +101,7 @@ io.on('connection', function (socket) {
         if (pokerRooms.hasOwnProperty(socket.room)) {
             //remove user from the room
             delete pokerRooms[socket.room].users[socket.id];
-            chatMessage(socket.room, socket.username + ' left the room');
+            chatMessage(socket.room, 'left the room');
             updateUsers(socket.room);
 
             //if was last user remove room
@@ -122,17 +123,23 @@ io.on('connection', function (socket) {
     //planning poker functions
     socket.on('startPoker', function (data) {
         io.to(data.room).emit('unlockCards');
-        chatMessage(data.room, socket.username + " has started a new round for " + pokerRooms[data.room].task);
+        chatMessage(data.room, "has started planning for <strong>" + pokerRooms[data.room].task + "</strong>");
     });
 
-    socket.on('stopPoker', function () {
+    socket.on('stopPoker', function (data) {
         io.to(data.room).emit('lockCards');
+        chatMessage(data.room, "stopped the room");
+    });
+
+    socket.on('resumePoker', function (data) {
+        io.to(data.room).emit('unlockCards');
+        chatMessage(data.room, "resumed the room");
     });
 
     socket.on('restartPoker', function (data) {
         io.to(data.room).emit('lockCards');
         pokerReset(data.room);
-        chatMessage(data.room, socket.username + " reset the room");
+        chatMessage(data.room, "reset the room");
     });
 
     socket.on('pokerPlayed', function (data) {
@@ -143,10 +150,11 @@ io.on('connection', function (socket) {
         updatePercentage(data.room, percentageComplete);
         pokerRooms[data.room].numbers.push(data.value);
 
-        chatMessage(data.room, socket.username + " played " + data.value);
+        chatMessage(data.room, "played <strong>" + data.value + "</strong>");
 
         if (pokerRooms[data.room].played >= amountUsers) {
-            chatMessage(data.room, "Everyone played!");
+            io.to(data.room).emit('pokerFinished');
+            chatMessage(data.room, "Everyone has played their card!", false);
         }
     });
 
@@ -156,7 +164,8 @@ io.on('connection', function (socket) {
             total += pokerRooms[data.room].numbers[i];
         }
         let avg = total / pokerRooms[data.room].numbers.length;
-        chatMessage(data.room, "Revealing the result: " + avg);
+        chatMessage(data.room, "is revealing the result...");
+        chatMessage(data.room, "The total effort for <strong>" + pokerRooms[data.room].task + "</strong> is <strong>" + avg + "</strong>", false);
         pokerReset(data.room);
     });
 1
@@ -166,12 +175,14 @@ io.on('connection', function (socket) {
     });
 
     //global socket functions
-    function chatMessage(room, message, ignoreUser = false) {
-        if (ignoreUser) {
-            socket.broadcast.to(room).emit('newChatMessage', message);
-        } else {
-            io.to(room).emit('newChatMessage', message);
+    function chatMessage(room, message, appendUsername = true) {
+        let messageString = message;
+        if (appendUsername) {
+            messageString = "<strong>" + socket.username + "</strong> " + message;
         }
+        pokerRooms[room].chat_history.push(messageString);
+        io.to(room).emit('newChatMessage', messageString);
+
     }
 
     function roomList(userUpdate = true) {
@@ -183,7 +194,7 @@ io.on('connection', function (socket) {
     }
 
     function updateTaskName(room) {
-        chatMessage(room, "<strong>" + socket.username + "</strong> update the task name to <strong>" + pokerRooms[room].task + "</strong>");
+        chatMessage(room, "changed the task name to <strong>" + pokerRooms[room].task + "</strong>");
         io.to(room).emit('updateTaskName', pokerRooms[room].task);
     }
 
@@ -192,16 +203,17 @@ io.on('connection', function (socket) {
     }
 
     function setNewHost(room, hostId) {
+        let newHost = '';
         //if there is a host id set it otherwise pick one at random
         if(hostId) {
             //set to the host id
         } else {
             let userObj = Object.keys(pokerRooms[room].users);
-            let newHost = userObj[Math.floor(Math.random() * userObj.length)];
+            newHost = userObj[Math.floor(Math.random() * userObj.length)];
             pokerRooms[room].host = newHost;
             pokerRooms[room].users[newHost].is_host = true;
         }
-        //chatMessage(room, pokerRooms[room].users[newHost].name + ' is now the host');
+        chatMessage(room, pokerRooms[room].users[newHost].name + ' is now the host');
         io.to(room).emit('updateUsers', pokerRooms[room].users);
     }
 

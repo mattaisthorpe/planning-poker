@@ -1,9 +1,20 @@
-<nav class="navbar">
-    <a class="navbar-brand" href="/">{{title}}</a>
+<nav class="navbar navbar-expand-sm navbar-light bg-light">
+    <a class="navbar-brand h1 mb-0" href="/">{{title}}</a>
 
     {{#if show-leave}}
-    <form class="form-inline float-right">
-        <a href="/rooms" class="btn btn-outline-danger" type="button">Leave Room</a>
-    </form>
+    <ul class="navbar-nav ml-auto">
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle poker-username" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
+                aria-haspopup="true" aria-expanded="false">
+                Username
+            </a>
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                {{!-- <button class="dropdown-item" href="#">Change name</button> --}}
+                <a class="dropdown-item" href="/rooms">View Rooms</a>
+                <div class="dropdown-divider"></div>
+                <a href="/" class="dropdown-item" type="button">Leave Room</a>
+            </div>
+        </li>
+    </ul>
     {{/if}}
 </nav>
