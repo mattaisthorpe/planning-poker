@@ -74,7 +74,9 @@ io.on('connection', function (socket) {
 
             //announce user has joined room
             updateUsers(room);
-            chatMessage(room, 'joined the room');
+            if (!socket.is_host) {
+                chatMessage(room, 'joined the room');
+            }
             roomList(false);
             socket.emit('connectedToRoom', {
                 is_host: socket.is_host,
@@ -97,7 +99,17 @@ io.on('connection', function (socket) {
         updateTaskName(data.room);
     });
 
-    //when user disconnected (might update number users)
+    //change host
+    socket.on('changeHost', function (data) {
+        //set new user to be host
+        pokerRooms[data.room].users[data.user_id].is_host = true;
+        pokerRooms[data.room].host = data.user_id;
+        //current addmin gets revoked
+        pokerRooms[data.room].users[socket.id].is_host = false;
+        updateUsers(data.room);
+    });
+
+    //when user disconnected
     socket.on('disconnect', function () {
         if (pokerRooms.hasOwnProperty(socket.room)) {
             //remove user from the room
@@ -123,6 +135,7 @@ io.on('connection', function (socket) {
 
     //planning poker functions
     socket.on('startPoker', function (data) {
+        pokerReset(data.room);
         io.to(data.room).emit('unlockCards');
         updateCards(data.room);
         chatMessage(data.room, "has started planning for <strong>" + pokerRooms[data.room].task + "</strong>");
@@ -153,6 +166,9 @@ io.on('connection', function (socket) {
         pokerRooms[data.room].numbers.push(data.value);
         updateCards(data.room);
 
+        pokerRooms[data.room].users[socket.id].played = true;
+        updateUsers(data.room);
+
         chatMessage(data.room, "played <strong>" + data.value + "</strong>");
 
         if (pokerRooms[data.room].played >= amountUsers) {
@@ -171,9 +187,8 @@ io.on('connection', function (socket) {
         chatMessage(data.room, "is revealing the result...");
         chatMessage(data.room, "The total effort for <strong>" + pokerRooms[data.room].task + "</strong> is <strong>" + average + "</strong>", false);
         revealCards(data.room);
-        pokerReset(data.room);
     });
-1
+
     //chat message function (may remove)
     socket.on('chatMessage', function (data) {
         chatMessage(data.room, data.message);
@@ -210,7 +225,7 @@ io.on('connection', function (socket) {
     function setNewHost(room, hostId) {
         let newHost = '';
         //if there is a host id set it otherwise pick one at random
-        if(hostId) {
+        if (hostId) {
             //set to the host id
         } else {
             let userObj = Object.keys(pokerRooms[room].users);
@@ -218,7 +233,7 @@ io.on('connection', function (socket) {
             pokerRooms[room].host = newHost;
             pokerRooms[room].users[newHost].is_host = true;
         }
-        chatMessage(room, pokerRooms[room].users[newHost].name + ' is now the host');
+        chatMessage(room, pokerRooms[room].users[newHost].name + ' is now an admin');
         io.to(room).emit('updateUsers', pokerRooms[room].users);
     }
 
@@ -234,21 +249,37 @@ io.on('connection', function (socket) {
         io.to(room).emit('revealCards', pokerRooms[room].average);
     }
 
+    function resetUsersPlayed(room) {
+        let users = Object.keys(pokerRooms[room].users)
+        for (let i = 0; i < users.length; i++) {
+            pokerRooms[room].users[users[i]].played = false;
+        }
+        updateUsers(room);
+    }
+
     function pokerReset(room) {
         pokerRooms[room].played = 0;
         pokerRooms[room].numbers = [];
         updatePercentage(room, 0);
+        updateCards(room);
+        resetUsersPlayed(room);
     }
 
 });
 
 //global functions
 function roomName(roomName) {
-    return randomNames.roomnames[Math.floor(Math.random() * randomNames.roomnames.length)].name;
+    if (roomName == '') {
+        roomName = randomNames.roomnames[Math.floor(Math.random() * randomNames.roomnames.length)].name;
+    }
+    return roomName;
 }
 
 function userName(userName) {
-    return randomNames.usernames[Math.floor(Math.random() * randomNames.usernames.length)].name;
+    if (userName == '') {
+        userName = randomNames.usernames[Math.floor(Math.random() * randomNames.usernames.length)].name;
+    }
+    return userName;
 }
 
 http.listen(port);

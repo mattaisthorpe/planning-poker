@@ -27,7 +27,7 @@ npm install
 3. Run the app
 
 ```bash
-node app.js
+npm start
 ```
 
 ## Features
@@ -42,10 +42,18 @@ node app.js
 - [x] Generate unique room id and url
 - [x] List available rooms to join
 - [x] Send messages room
-- [ ] Set new admin for room
-- [ ] Edit username (current randomly generated)
-- [ ] Edit roomname (current randomly generated)
-- [ ] Use toastr like alert for certain messages
-- [ ] Add some icons around the place
-- [ ] Mark which users have played
-- [ ] Make mobile responsive
+- [x] Show feed of user interactions in room
+- [X] Current Admin can set new admin for room
+- [X] Set username (if nothing entered randomly generated)
+- [X] Set roomname (if nothing entered randomly generated)
+- [X] Mark which room members have played
+
+## TODO
+- [ ] Option to Hide the feed of user actions
+- [ ] Option to show the number users played
+- [ ] Option to show user name against card played
+- [ ] Use toastr alert or similar for certain users actions
+- [ ] Change username after entering room
+- [ ] Change roomname after room creation
+- [ ] Make ui mobile responsive
+- [ ] Improve feature to edit task name (also use for room and user names)

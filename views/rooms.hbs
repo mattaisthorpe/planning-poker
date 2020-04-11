@@ -1,7 +1,7 @@
 <h1>Rooms available</h1>
 <div id="rooms" class="list-group mb-3"></div>
 <div class="text-center">
-    <button class="btn btn-lg btn-primary btn-block create-room-btn">Create Room</button>
+    <button class="btn btn-lg btn-primary create-room-btn col-sm-3">Create Room</button>
 </div>
 {{> scripts}}
 <script>
@@ -20,7 +20,11 @@
                     $("#rooms").append(string);
                 });
             } else {
-                let string = '<li class="list-group-item list-group-item-warning">Unfortunately there are no rooms available. Would you like to create your own room?</li>';
+                let userString = '';
+                if (localStorage.getItem('pp-username') !== null && localStorage.getItem('pp-username') != '') {
+                    userString = ' <strong>' + localStorage['pp-username'] + '</strong> ';
+                }
+                let string = '<li class="list-group-item list-group-item-warning">Unfortunately ' + userString + 'there are no rooms available. Would you like to create your own room?</li>';
                 $("#rooms").append(string);
             }
         });

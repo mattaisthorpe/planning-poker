@@ -4,38 +4,48 @@
 {{> header}}
 
 <body class="welcome-body text-center">
-    <div class="welcome-box">
+    <div class="card shadow welcome-box">
         <h1 class="h3 mb-3 font-weight-normal">Planning Poker</h1>
-        {{!-- <form id="create-room-form" class="mb-2" action="" method="post">
-            
-            <div class="form-group row">
-                <label for="room-name" class="col-sm-2 col-form-label">Room</label>
-                <div class="col-sm-10">
-                    <input type="text" class="form-control" id="room-name" placeholder="Room name">
-                </div>
+        <div class="input-group mb-3">
+            <input type="text" class="form-control form-control-lg" id="user-name" placeholder="User name"
+                aria-label="username" aria-describedby="button-addon2">
+            <div class="input-group-append">
+                <button class="btn btn-lg btn-outline-primary join-room-btn" type="submit" id="button-addon2">Join</button>
             </div>
-
-            <div class="form-group row">
-                <label for="room-name" class="col-sm-2 col-form-label">User</label>
-                <div class="col-sm-10">
-                    <input type="text" class="form-control" id="room-name" placeholder="User name">
-                </div>
-            </div>
-        </form> --}}
-        <button class="btn btn-lg btn-primary btn-block create-room-btn">Create Room</button>
-        <div class="mt-2 mb-2">
-            <hr class="d-inline"><p class="d-inline">or</p><hr class="d-inline">
         </div>
-        <a href="/rooms" class="btn btn-lg btn-primary btn-block">Join Room</a>
-        <p class="mt-3 text-muted">&copy; 2020</p>
+        <div class="mb-3">
+            or
+        </div>
+        <div class="input-group mb-2">
+            <input type="text" class="form-control form-control-lg" id="room-name" placeholder="Room name"
+                aria-label="username" aria-describedby="button-addon2">
+            <div class="input-group-append">
+                <button class="btn btn-lg btn-outline-primary create-room-btn" type="submit" id="button-addon2">Create</button>
+            </div>
+        </div>
+        <div class="mb-2">
+            <small>If either name is not entered a random one will be randomly generated for you.</small>
+        </div>
+        <div>
+            <p class="text-muted">&copy; 2020</p>
+        </div>
     </div>
     <script src="/js/jquery.min.js"></script>
     <script src="/js/bootstrap.min.js"></script>
     <script src="/js/custom.js"></script>
     <script>
         $(function () {
+            $(".join-room-btn").on("click", function () {
+                const userName = $('#user-name').val();
+                localStorage.setItem('pp-username', userName);
+                window.location.href = "/rooms";
+            });
             $(".create-room-btn").on("click", function () {
                 const roomID = randomstring();
+                const userName = $('#user-name').val();
+                const roomName = $('#room-name').val();
+                localStorage.setItem(roomID + 'room', roomName);
+                localStorage.setItem('pp-username', userName);
                 window.location.href = "/room#" + roomID;
             });
         });
