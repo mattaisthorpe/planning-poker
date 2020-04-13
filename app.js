@@ -99,6 +99,20 @@ io.on('connection', function (socket) {
         updateTaskName(data.room);
     });
 
+    //change name of room
+    socket.on('changeRoomName', function (data) {
+        pokerRooms[data.room].name = data.name;
+        updateRoomName(data.room);
+    });
+
+    //change username
+    socket.on('changeUserName', function (data) {
+        chatMessage(data.room, 'changed their username to <strong>'+data.name+'</strong>');
+        pokerRooms[data.room].users[socket.id].name = data.name;
+        socket.username = data.name;
+        updateUsers(data.room);
+    });
+
     //change host
     socket.on('changeHost', function (data) {
         //set new user to be host
@@ -216,6 +230,12 @@ io.on('connection', function (socket) {
     function updateTaskName(room) {
         chatMessage(room, "changed the task name to <strong>" + pokerRooms[room].task + "</strong>");
         io.to(room).emit('updateTaskName', pokerRooms[room].task);
+    }
+
+    function updateRoomName(room) {
+        chatMessage(room, "changed the room name to <strong>" + pokerRooms[room].name + "</strong>");
+        io.to(room).emit('updateRoomName', pokerRooms[room].name);
+        roomList(false);
     }
 
     function updateUsers(room) {

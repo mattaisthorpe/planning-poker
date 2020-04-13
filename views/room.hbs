@@ -1,22 +1,16 @@
-<div id="roomNo" class="alert alert-primary" role="alert">
-    Placeholder message...
+<div class="alert alert-primary" role="alert">
+    <span id="welcome-message">Placeholder message...</span>
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
 </div>
 
 <div class="row">
     <div class="col">
         <div class="text-center">
             <div id="task-name-area">
-                <h1 id="task-name" class="d-inline mb-2">New Task</h1>
+                <h1 id="task-name" class="d-inline mb-2 editable admin-editable">New Task</h1>
             </div>
-            <form id="task-name-form" class="form-inline ">
-                <div class="input-group mb-3">
-                    <input type="text" class="form-control" id="task-name-field" value="New Task" aria-label="message"
-                        aria-describedby="button-addon2">
-                    <div class="input-group-append">
-                        <button class="btn btn-primary" type="submit" id="button-addon2">Update</button>
-                    </div>
-                </div>
-            </form>
             <hr>
         </div>
 
@@ -49,14 +43,13 @@
                     {{!-- <button type="button" class="btn btn-outline-danger btn-block stop-poker">Stop</button>
             <button type="button" class="btn btn-outline-danger btn-block resume-poker">Resume</button> --}}
                     <button type="button" class="btn btn-warning btn-block reset-poker">Restart</button>
-                    <button type="button" class="btn btn-secondary btn-block edit-task-btn">Edit Task Name</button>
                 </div>
             </div>
         </div>
 
         <div class="card shadow-sm">
             <div class="card-body">
-                <h5 class="card-title poker-roomname">Card title</h5>
+                <h5 id="room-name" class="card-title poker-roomname editable admin-editable">Room name</h5>
                 <form id="message-form" class="form-inline ">
                     <div class="input-group mb-3">
                         <input type="text" class="form-control form-control-sm" id="message"
@@ -83,11 +76,11 @@
             roomData.hash = hash;
             roomData.roomname = '';
             if (localStorage.getItem(hash + 'room') !== null) {
-                roomData.roomname = localStorage[hash + 'room'];
+                roomData.roomname = localStorage.getItem(hash + 'room');
             }
             roomData.username = '';
             if (localStorage.getItem('pp-username') !== null) {
-                roomData.username = localStorage['pp-username'];
+                roomData.username = localStorage.getItem('pp-username');
             }
             roomController(roomData);
         } else {
@@ -101,24 +94,21 @@
 
         //hide all controls
         $('#task-name-form').hide();
-        $('.edit-task-btn').hide();
         $('.admin-controls').hide();
 
         //disable cards
         $('.poker-card').attr('disabled', 'disabled');
         $('.admin-controls .btn').attr('disabled', 'disabled');
         $('.admin-controls .start-poker').removeAttr('disabled');
-        $('.admin-controls .edit-task-btn').removeAttr('disabled');
-
-        //enable buttons
 
         //connecting to room
         socket.emit('connectToRoom', roomData);
 
         socket.on('connectedToRoom', function (response) {
-            $('#roomNo').html(response.message);
+            $('#welcome-message').html(response.message);
             if (response.is_host) {
                 $('.admin-controls').show();
+                $('.admin-editable').attr('contenteditable', true);
                 isHost = true;
             } else {
                 //we need to show all previous room content
@@ -127,7 +117,8 @@
                 });
             }
             $('.poker-username').text(response.username);
-            $('.poker-roomname').text(response.room.name);
+            $('#room-name').html(response.room.name);
+            $('#task-name').html(response.room.task);
         });
 
         //for planning poker
@@ -140,7 +131,6 @@
         $('.reset-poker').on("click", function () {
             $('.admin-controls .btn').attr('disabled', 'disabled');
             $('.admin-controls .start-poker').removeAttr('disabled');
-            $('.admin-controls .edit-task-btn').removeAttr('disabled');
             socket.emit('restartPoker', { "room": hash });
         });
 
@@ -156,7 +146,6 @@
             $('.admin-controls .btn').attr('disabled', 'disabled');
             $('.admin-controls .start-poker').removeAttr('disabled');
             $('.admin-controls .reset-poker').removeAttr('disabled');
-            $('.admin-controls .edit-task-btn').removeAttr('disabled');
             socket.emit('revealPoker', { "room": hash });
         });
 
@@ -219,6 +208,9 @@
                 let attributes = '';
                 let element = 'button type="button"';
                 let string = val.name;
+                if (i == socket.id) {
+                    string = '<span id="user-name" class="editable" contenteditable="true">' + val.name + '</span>';
+                }
                 if (val.played == true) {
                     string = '<span class="badge badge-success badge-pill">Played</span>' + string;
                 }
@@ -226,12 +218,11 @@
                     string += '<span class="badge badge-primary badge-pill">Admin</span>';
                     if (i == socket.id) {
                         isHost = true;
-                        $('.edit-task-btn').show();
                         $('.admin-controls').show();
                         $('.admin-controls .btn').attr('disabled', 'disabled');
                         $('.admin-controls .start-poker').removeAttr('disabled');
                         $('.admin-controls .reset-poker').removeAttr('disabled');
-                        $('.admin-controls .edit-task-btn').removeAttr('disabled');
+                        $('.admin-editable').attr('contenteditable', true);
                     }
                 }
                 if (i == socket.id) {
@@ -240,22 +231,15 @@
                     classes += ' list-group-item-primary';
                     if (val.is_host == false) {
                         isHost = false;
-                        $('.edit-task-btn').hide();
                         $('.admin-controls').hide();
+                        $('.admin-editable').attr('contenteditable', false);
                     }
                 } else {
-                    classes += ' list-group-item-action';
+                    classes += ' member-item list-group-item-action';
                 }
                 attributes += ' data-userid="' + i + '" data-username="' + val.name + '"';
-                $('#users').append($('<' + element + ' class="list-group-item d-flex member-item justify-content-between align-items-center' + classes + '"' + attributes + '>').html(string));
+                $('#users').append($('<' + element + ' class="list-group-item d-flex  justify-content-between align-items-center' + classes + '"' + attributes + '>').html(string));
             });
-        });
-
-        //edit task button
-        $('.edit-task-btn').on('click', function () {
-            $('#task-name-area').hide();
-            $('#task-name-form').show();
-            $('#task-name-field').val($('#task-name').text()).focus();
         });
 
         //set user admin
@@ -268,19 +252,78 @@
             }
         });
 
-        $('#task-name-form').submit(function (e) {
-            e.preventDefault(); // prevents page reloading
-            const newTaskName = $('#task-name-field').val();
-            socket.emit('changeTaskName', { "room": hash, "name": newTaskName });
-            $('#task-name-area').show();
-            $('#task-name-form').hide();
-            return false;
-        });
-
         //update task name text
-        socket.on('updateTaskName', function (newTaskName) {
-            $('#task-name').text(newTaskName);
+        let taskName = '';
+        $('#task-name').on('focusin', function () {
+            taskName = $(this).html();
         });
 
+        $('#task-name').on('focusout', function () {
+            let newTaskName = $(this).html();
+            if (newTaskName != '' && newTaskName != taskName) {
+                taskName = newTaskName;
+                socket.emit('changeTaskName', { "room": hash, "name": newTaskName });
+            }
+
+            //if task name was blank then change back to old name
+            if (newTaskName == '') {
+                $('#task-name').html(taskName);
+            }
+        });
+
+        socket.on('updateTaskName', function (newTaskName) {
+            $('#task-name').html(newTaskName);
+        });
+
+        //update room name
+        let roomname = '';
+        $('#room-name').on('focusin', function () {
+            roomName = $(this).html();
+        });
+
+        $('#room-name').on('focusout', function () {
+            let newRoomName = $(this).html();
+            if (newRoomName != '' && newRoomName != roomName) {
+                roomName = newRoomName;
+                socket.emit('changeRoomName', { "room": hash, "name": newRoomName });
+            }
+
+            //if room name was blank then change back to old name
+            if (newRoomName == '') {
+                $('#task-name').html(roomName);
+            }
+        });
+
+        socket.on('updateRoomName', function (newRoomName) {
+            $('#room-name').html(newRoomName);
+        });
+
+        //update user name
+        let userName = '';
+        $(document).on('focusin', '#user-name', function () {
+            userName = $(this).html();
+        });
+
+        $(document).on('focusout', '#user-name', function () {
+            let newUserName = $(this).html();
+            if (newUserName != '' && newUserName != userName) {
+                userName = newUserName;
+                localStorage.setItem('pp-username', newUserName);
+                socket.emit('changeUserName', { "room": hash, "name": newUserName });
+            }
+
+            //if user name was blank then change back to old name
+            if (newUserName == '') {
+                $('#user-name').html(userName);
+            }
+        });
+
+        //leave an editable area if enter is pressed
+        $(document).on('keydown', '.editable', function (e) {
+            var key = e.keyCode;
+            if (key == 13) {  // if enter key is pressed
+                $(this).blur();
+            }
+        });
     }
 </script>

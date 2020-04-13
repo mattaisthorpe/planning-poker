@@ -47,13 +47,14 @@ npm start
 - [X] Set username (if nothing entered randomly generated)
 - [X] Set roomname (if nothing entered randomly generated)
 - [X] Mark which room members have played
+- [X] Change username after entering room
+- [X] Change roomname after room creation
+- [X] Improve feature to edit task name (also use for room and user names)
 
 ## TODO
 - [ ] Option to Hide the feed of user actions
 - [ ] Option to show the number users played
 - [ ] Option to show user name against card played
 - [ ] Use toastr alert or similar for certain users actions
-- [ ] Change username after entering room
-- [ ] Change roomname after room creation
 - [ ] Make ui mobile responsive
-- [ ] Improve feature to edit task name (also use for room and user names)
+- [ ] Clean up javascript
