@@ -50,11 +50,14 @@ npm start
 - [X] Change username after entering room
 - [X] Change roomname after room creation
 - [X] Improve feature to edit task name (also use for room and user names)
+- [X] Make ui mobile responsive
 
 ## TODO
+- [ ] Brand UI from default bootstrap
+- [ ] Enhance UX with animations/effects
+- [ ] Add side menu for mobile interface
 - [ ] Option to Hide the feed of user actions
 - [ ] Option to show the number users played
 - [ ] Option to show user name against card played
 - [ ] Use toastr alert or similar for certain users actions
-- [ ] Make ui mobile responsive
 - [ ] Clean up javascript
