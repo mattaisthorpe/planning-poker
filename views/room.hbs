@@ -89,6 +89,12 @@
         $('#task-name-form').hide();
         $('.admin-controls').hide();
 
+        //if desktop show members
+        const windowWidth = $(window).width();
+        if(windowWidth >= 768) {
+            $('#collapseMembers').addClass('show')
+        }
+
         //disable cards
         $('.poker-card').attr('disabled', 'disabled');
         $('.admin-controls .btn').attr('disabled', 'disabled');
