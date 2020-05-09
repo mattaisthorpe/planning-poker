@@ -91,7 +91,7 @@
 
         //if desktop show members
         const windowWidth = $(window).width();
-        if(windowWidth >= 768) {
+        if (windowWidth >= 768) {
             $('#collapseMembers').addClass('show')
         }
 
@@ -189,7 +189,10 @@
         //for chat area (may remove)
         $('.message-form').submit(function (e) {
             e.preventDefault(); // prevents page reloading
-            socket.emit('chatMessage', { "room": hash, "message": $('#message').val() });
+            let message = $('#message').val();
+            if (message.length > 0) {
+                socket.emit('chatMessage', { "room": hash, "message": $('#message').val() });
+            }
             $('#message').val('');
             return false;
         });

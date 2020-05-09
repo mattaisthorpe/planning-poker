@@ -76,7 +76,7 @@ io.on('connection', function (socket) {
             //announce user has joined room
             updateUsers(room);
             if (!socket.is_host) {
-                chatMessage(room, 'joined the room');
+                chatMessage(room, 'joined the room', true, true);
             }
             roomList(false);
             socket.emit('connectedToRoom', {
@@ -211,14 +211,17 @@ io.on('connection', function (socket) {
     });
 
     //global socket functions
-    function chatMessage(room, message, appendUsername = true) {
+    function chatMessage(room, message, appendUsername = true, ingoreUser = false) {
         let messageString = message;
         if (appendUsername) {
             messageString = "<strong>" + socket.username + "</strong> " + message;
         }
-        pokerRooms[room].chat_history.unshift(messageString);
-        io.to(room).emit('newChatMessage', messageString);
-
+        pokerRooms[room].chat_history.push(messageString);
+        if(ingoreUser) {
+            socket.to(room).emit('newChatMessage', messageString);
+        } else {
+            io.in(room).emit('newChatMessage', messageString);
+        }
     }
 
     function roomList(userUpdate = true) {
