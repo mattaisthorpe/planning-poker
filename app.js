@@ -1,9 +1,10 @@
 const express = require('express');
 const handlebars = require('express-handlebars');
+const PORT = process.env.PORT || 3000;
 const app = express();
-const http = require('http').createServer(app);
-const port = 3000;
-const io = require('socket.io')(http);
+const server = app.listen(PORT, () => console.log(`Listening on ${PORT}`));
+const io = require('socket.io')(server);
+
 const randomNames = require('./config/randomnames');
 
 //global settings
@@ -24,7 +25,7 @@ app.engine('hbs', handlebars({
 //access public files
 app.use('/', express.static(__dirname + '/public'));
 
-//set tempaltes depending on url
+//set templates depending on url
 app.get('/', (req, res) => {
     res.render('homepage', { layout: false });
 });
@@ -301,5 +302,3 @@ function userName(userName) {
     }
     return userName;
 }
-
-http.listen(port);
