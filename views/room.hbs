@@ -195,7 +195,9 @@
 
         //reload user list
         socket.on('updateUsers', function (users) {
+            const membersCount = Object.keys(users).length;
             $('.room-members').empty();
+            $('.member-count').text(membersCount);
             $.each(users, function (i, val) {
                 let classes = '';
                 let attributes = '';

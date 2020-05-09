@@ -186,7 +186,7 @@ io.on('connection', function (socket) {
 
         //chatMessage(data.room, "played <strong>" + data.value + "</strong>");
         chatMessage(data.room, "played their card");
-        
+
         if (pokerRooms[data.room].played >= amountUsers) {
             io.to(data.room).emit('pokerFinished');
             chatMessage(data.room, "Everyone has played their card!", false);
@@ -255,7 +255,7 @@ io.on('connection', function (socket) {
             pokerRooms[room].host = newHost;
             pokerRooms[room].users[newHost].is_host = true;
         }
-        chatMessage(room, pokerRooms[room].users[newHost].name + ' is now an admin');
+        chatMessage(room, 'left :( <strong>' + pokerRooms[room].users[newHost].name + '</strong> is now an admin');
         io.to(room).emit('updateUsers', pokerRooms[room].users);
     }
 
