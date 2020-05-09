@@ -184,8 +184,9 @@ io.on('connection', function (socket) {
         pokerRooms[data.room].users[socket.id].played = true;
         updateUsers(data.room);
 
-        chatMessage(data.room, "played <strong>" + data.value + "</strong>");
-
+        //chatMessage(data.room, "played <strong>" + data.value + "</strong>");
+        chatMessage(data.room, "played their card");
+        
         if (pokerRooms[data.room].played >= amountUsers) {
             io.to(data.room).emit('pokerFinished');
             chatMessage(data.room, "Everyone has played their card!", false);
@@ -215,7 +216,7 @@ io.on('connection', function (socket) {
         if (appendUsername) {
             messageString = "<strong>" + socket.username + "</strong> " + message;
         }
-        pokerRooms[room].chat_history.push(messageString);
+        pokerRooms[room].chat_history.unshift(messageString);
         io.to(room).emit('newChatMessage', messageString);
 
     }

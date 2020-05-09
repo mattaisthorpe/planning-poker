@@ -6,7 +6,32 @@
 </div>
 
 <div class="row">
-    <div class="col">
+
+    <div class="col-12 col-md-3 order-md-12">
+        {{!-- <div class="admin-controls mb-3 d-none d-md-block"> --}}
+        <div class="admin-controls mb-3">
+            {{> controls}}
+        </div>
+
+        <div class="card shadow-sm mb-3">
+            <div class="card-body">
+                <h5 id="room-name" class="card-title editable admin-editable">Room name</h5>
+                <form class="message-form form-inline">
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control form-control-sm" id="message"
+                            placeholder="Message room..." aria-label="message" aria-describedby="button-addon2">
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-secondary btn-sm" type="submit"
+                                id="button-addon2">Send</button>
+                        </div>
+                    </div>
+                </form>
+                {{> members}}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-9">
         <div class="text-center">
             <div id="task-name-area">
                 <h1 id="task-name" class="d-inline mb-2 editable admin-editable">New Task</h1>
@@ -33,39 +58,7 @@
 
         <ul id="messages" class="list-group"></ul>
     </div>
-    <div class="col-3">
-        <div class="admin-controls mb-3">
-            <div class="card shadow-sm">
-                <h5 class="card-header">Controls</h5>
-                <div class="card-body">
-                    <button type="button" class="btn btn-success btn-block start-poker">Start Poker</button>
-                    <button type="button" class="btn btn-info btn-block reveal-poker">Reveal Cards</button>
-                    {{!-- <button type="button" class="btn btn-outline-danger btn-block stop-poker">Stop</button>
-            <button type="button" class="btn btn-outline-danger btn-block resume-poker">Resume</button> --}}
-                    <button type="button" class="btn btn-warning btn-block reset-poker">Restart</button>
-                </div>
-            </div>
-        </div>
 
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <h5 id="room-name" class="card-title poker-roomname editable admin-editable">Room name</h5>
-                <form id="message-form" class="form-inline ">
-                    <div class="input-group mb-3">
-                        <input type="text" class="form-control form-control-sm" id="message"
-                            placeholder="Message room..." aria-label="message" aria-describedby="button-addon2">
-                        <div class="input-group-append">
-                            <button class="btn btn-outline-secondary btn-sm" type="submit"
-                                id="button-addon2">Send</button>
-                        </div>
-                    </div>
-                </form>
-                <h6 class="card-subtitle mb-2 text-muted">Room members</h6>
-                <div id="users" class="list-group"></div>
-            </div>
-        </div>
-
-    </div>
 </div>
 {{> scripts}}
 <script>
@@ -113,7 +106,7 @@
             } else {
                 //we need to show all previous room content
                 $.each(response.room.chat_history, function (i, val) {
-                    $('#messages').append($('<li class="list-group-item">').html(val));
+                    $('#messages').prepend($('<li class="list-group-item">').html(val));
                 });
             }
             $('.poker-username').text(response.username);
@@ -188,7 +181,7 @@
         });
 
         //for chat area (may remove)
-        $('#message-form').submit(function (e) {
+        $('.message-form').submit(function (e) {
             e.preventDefault(); // prevents page reloading
             socket.emit('chatMessage', { "room": hash, "message": $('#message').val() });
             $('#message').val('');
@@ -197,12 +190,12 @@
 
         //any messages append to this feed (may turn into json)
         socket.on('newChatMessage', function (message) {
-            $('#messages').append($('<li class="list-group-item">').html(message));
+            $('#messages').prepend($('<li class="list-group-item">').html(message));
         });
 
         //reload user list
         socket.on('updateUsers', function (users) {
-            $('#users').empty();
+            $('.room-members').empty();
             $.each(users, function (i, val) {
                 let classes = '';
                 let attributes = '';
@@ -238,7 +231,7 @@
                     classes += ' member-item list-group-item-action';
                 }
                 attributes += ' data-userid="' + i + '" data-username="' + val.name + '"';
-                $('#users').append($('<' + element + ' class="list-group-item d-flex  justify-content-between align-items-center' + classes + '"' + attributes + '>').html(string));
+                $('.room-members').append($('<' + element + ' class="list-group-item d-flex  justify-content-between align-items-center' + classes + '"' + attributes + '>').html(string));
             });
         });
 
@@ -290,7 +283,7 @@
 
             //if room name was blank then change back to old name
             if (newRoomName == '') {
-                $('#task-name').html(roomName);
+                $('#room-name').html(roomName);
             }
         });
 
