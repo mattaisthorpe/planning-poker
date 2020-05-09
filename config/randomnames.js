@@ -195,34 +195,34 @@ module.exports = {
     ],
     roomnames: [
         {
-            "name": "Drifting Planet"
+            "name": "Final Destination"
         },
         {
-            "name": "Vacant Domain"
+            "name": "Rumble Falls"
         },
         {
-            "name": "Central Earth"
+            "name": "Bridge of Eldin"
         },
         {
-            "name": "Miniature Expanse"
+            "name": "Norfair"
         },
         {
-            "name": "Revised Shore"
+            "name": "Yoshi's Island"
         },
         {
-            "name": "Lush Archipelago"
+            "name": "Halberd"
         },
         {
-            "name": "Shielded Forest"
+            "name": "Pokémon Stadium"
         },
         {
-            "name": "Dawn Rift"
+            "name": "Castle Siege"
         },
         {
-            "name": "Southern Fields"
+            "name": "Rainbow Cruise"
         },
         {
-            "name": "Belated Region"
+            "name": "Green Greens"
         }
     ]
 };
