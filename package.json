@@ -7,6 +7,9 @@
         "express-handlebars": "^4.0.3",
         "socket.io": "^2.3.0"
     },
+    "engines": {
+        "node": "12.13.x"
+    },
     "scripts": {
         "start": "node app.js"
     }
