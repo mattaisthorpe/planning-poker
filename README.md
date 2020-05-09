@@ -57,6 +57,7 @@ npm start
 - [ ] Enhance UX with animations/effects
 - [ ] Add side menu for mobile interface
 - [ ] Option to Hide the feed of user actions
+- [ ] Count down timer for people to play cards
 - [ ] Option to show the number users played
 - [ ] Option to show user name against card played
 - [ ] Use toastr alert or similar for certain users actions
