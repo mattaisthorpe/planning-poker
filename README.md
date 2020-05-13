@@ -1,7 +1,7 @@
 # planning-poker
 Built on Socket.io, planning-poker was created to allow real-time project planning in a digital environment.
 
-![Planning Poker Screenshot](https://matthewaisthorpe.com.au/wp-content/uploads/2020/04/planning-poker-screenshot.jpg)
+![Planning Poker Screenshot](https://matthewaisthorpe.com.au/wp-content/uploads/2020/05/displayed-cards-1.jpg)
 
 ## What is planning poker
 Check out https://en.wikipedia.org/wiki/Planning_poker
