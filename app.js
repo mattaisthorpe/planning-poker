@@ -178,7 +178,7 @@ io.on('connection', function (socket) {
         let amountUsers = Object.keys(pokerRooms[data.room].users).length;
         let percentageComplete = pokerRooms[data.room].played / amountUsers * 100;
         updatePercentage(data.room, percentageComplete);
-        pokerRooms[data.room].numbers.push(data.value);
+        pokerRooms[data.room].numbers.push({user: socket.username, value: data.value});
         updateCards(data.room);
 
         pokerRooms[data.room].users[socket.id].played = true;
@@ -196,12 +196,12 @@ io.on('connection', function (socket) {
     socket.on('revealPoker', function (data) {
         let total = 0;
         for (let i = 0; i < pokerRooms[data.room].numbers.length; i++) {
-            total += pokerRooms[data.room].numbers[i];
+            total += pokerRooms[data.room].numbers[i].value;
         }
         let average = Math.floor(total / pokerRooms[data.room].numbers.length);
         pokerRooms[data.room].average = average;
         chatMessage(data.room, "is revealing the result...");
-        chatMessage(data.room, "The total effort for <strong>" + pokerRooms[data.room].task + "</strong> is <strong>" + average + "</strong>", false);
+        chatMessage(data.room, "The average estimated effort for <strong>" + pokerRooms[data.room].task + "</strong> is <strong>" + average + "</strong>", false);
         revealCards(data.room);
     });
 

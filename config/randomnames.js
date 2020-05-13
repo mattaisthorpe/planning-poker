@@ -166,7 +166,7 @@ module.exports = {
             "name": "Rosalina and Luma"
         },
         {
-            "name": "Mii classes"
+            "name": "Mii"
         },
         {
             "name": "Wario"
